@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gmail OAuth2 - Danalytics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px; 
+            margin: 40px auto; 
+            padding: 0 20px;
+            background: #f5f7fa;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .card { 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .success { color: green; } 
+        .error { color: red; }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px;
+        }
+        
+        th, td { 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            text-align: left; 
+        }
+        
+        th { 
+            background: #f5f5f5; 
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .btn { 
+            padding: 10px 20px; 
+            background: #4285f4; 
+            color: white; 
+            border: none;
+            border-radius: 5px; 
+            cursor: pointer; 
+            text-decoration: none; 
+            display: inline-block;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover { 
+            background: #357abd; 
+        }
+        
+        .btn-secondary {
+            background: #667eea;
+            margin-left: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #5568d3;
+        }
+        
+        input[type="email"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        input[type="email"]:focus,
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 10px 0;
+        }
+        
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        
+        /* Estilos para envío masivo */
+        .recipients-container {
+            background: #f9f9f9;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            min-height: 100px;
+            margin: 10px 0;
+        }
+        
+        .recipient-item {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .recipient-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .recipient-info {
+            flex: 1;
+        }
+        
+        .recipient-email {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .recipient-name {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .btn-remove {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+        
+        .btn-remove:hover {
+            background: #ff3838;
+        }
+        
+        .empty-state {
+            color: #999;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .progress-section {
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4285f4 0%, #667eea 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+        }
+        
+        .result-message {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .result-message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result-message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: #4285f4;
+            border-bottom-color: #4285f4;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>📧 Sistema de Notificaciones - Danalytics</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        <h2>Estado de Autorización</h2>
+        {% if tokens %}
+            <p class="success">✅ Cuenta(s) autorizada(s):</p>
+            <ul>
+                {% for token in tokens %}
+                    <li><strong>{{ token.email }}</strong> — Actualizado: {{ token.updated_at }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="error">⚠️ No hay cuentas autorizadas aún.</p>
+            <a href="{% url 'mailer:authorize' %}" class="btn">🔑 Autorizar cuenta Gmail</a>
+        {% endif %}
+    </div>
+
+    {% if tokens %}
+    <div class="card">
+        <h2>📤 Envío de Correos</h2>
+        
+        <!-- Tabs para alternancia entre envío individual y masivo -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'tab-individual')">
+                📧 Individual
+            </button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-bulk')">
+                📬 Masivo
+            </button>
+        </div>
+
+        <!-- TAB 1: Envío Individual -->
+        <div id="tab-individual" class="tab-content active">
+            <form method="post" action="{% url 'mailer:send_email' %}">
+                {% csrf_token %}
+                <p>
+                    <label><strong>Destinatario:</strong></label>
+                    <input type="email" name="to_email" required>
+                </p>
+                <p>
+                    <label><strong>Asunto:</strong></label>
+                    <input type="text" name="subject" required>
+                </p>
+                <p>
+                    <label><strong>Mensaje (HTML permitido):</strong></label>
+                    <textarea name="body" placeholder="Escribe tu mensaje aquí..."></textarea>
+                </p>
+                <button type="submit" class="btn">📤 Enviar Correo</button>
+            </form>
+        </div>
+
+        <!-- TAB 2: Envío Masivo -->
+        <div id="tab-bulk" class="tab-content">
+            <form id="bulkEmailForm">
+                <p>
+                    <label><strong>Asunto del Correo:</strong></label>
+                    <input type="text" id="subject" placeholder="Ej: Hola {name}, tienes una notificación" required>
+                    <small style="color: #999;">💡 Usa {name} para personalizar</small>
+                </p>
+
+                <p>
+                    <label><strong>Cuerpo del Correo (HTML):</strong></label>
+                    <textarea id="body_html" placeholder="Escribe el contenido HTML aquí. Usa {name} para personalizar." required></textarea>
+                    <small style="color: #999;">💡 Ejemplo: &lt;h1&gt;Hola {name}&lt;/h1&gt;</small>
+                </p>
+
+                <!-- Agregar destinatarios -->
+                <div style="background: #f0f4ff; border: 1px solid #e0e8ff; border-radius: 5px; padding: 15px; margin: 15px 0;">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">➕ Agregar Destinatarios</h3>
+                    <div class="form-row">
+                        <input type="email" id="recipientEmail" placeholder="correo@ejemplo.com" required>
+                        <input type="text" id="recipientName" placeholder="Nombre (opcional)">
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addRecipient()" style="width: 100%;">
+                        + Agregar Destinatario
+                    </button>
+                </div>
+
+                <!-- Lista de destinatarios -->
+                <p>
+                    <label><strong>Destinatarios Agregados:</strong></label>
+                    <div class="recipients-container" id="recipientsList">
+                        <div class="empty-state">No hay destinatarios agregados</div>
+                    </div>
+                </p>
+
+                <!-- Barra de progreso -->
+                <div class="progress-section" id="progressSection">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <!-- Mensaje de resultado -->
+                <div class="result-message" id="resultMessage"></div>
+
+                <!-- Botones de acción -->
+                <div class="form-row full">
+                    <button type="submit" id="submitBtn" class="btn" style="width: 100%;">
+                        ✅ Enviar Correos Masivos
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>📋 Log de Correos Recientes</h2>
+        {% if email_log %}
+        <table>
+            <tr>
+                <th>Destinatario</th>
+                <th>Asunto</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+            </tr>
+            {% for log in email_log %}
+            <tr>
+                <td>{{ log.recipient }}</td>
+                <td>{{ log.subject }}</td>
+                <td class="{% if log.status == 'sent' %}success{% else %}error{% endif %}">
+                    {% if log.status == 'sent' %}✅ Enviado{% else %}❌ Fallido{% endif %}
+                </td>
+                <td>{{ log.sent_at }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+            <p>No hay registros aún.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        let recipients = [];
+
+        function switchTab(event, tabId) {
+            event.preventDefault();
+            
+            // Ocultar todos los tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            // Mostrar el tab seleccionado
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function addRecipient() {
+            const email = document.getElementById('recipientEmail').value.trim();
+            const name = document.getElementById('recipientName').value.trim();
+
+            if (!email) {
+                alert('Por favor ingresa un correo electrónico');
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                alert('Por favor ingresa un correo válido');
+                return;
+            }
+
+            if (recipients.some(r => r.email === email)) {
+                alert('Este correo ya fue agregado');
+                return;
+            }
+
+            recipients.push({ email, name: name || email.split('@')[0] });
+            renderRecipients();
+
+            document.getElementById('recipientEmail').value = '';
+            document.getElementById('recipientName').value = '';
+            document.getElementById('recipientEmail').focus();
+        }
+
+        function removeRecipient(index) {
+            recipients.splice(index, 1);
+            renderRecipients();
+        }
+
+        function renderRecipients() {
+            const list = document.getElementById('recipientsList');
+
+            if (recipients.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay destinatarios agregados</div>';
+                return;
+            }
+
+            list.innerHTML = recipients.map((r, i) => `
+                <div class="recipient-item">
+                    <div class="recipient-info">
+                        <div class="recipient-email">📧 ${r.email}</div>
+                        <div class="recipient-name">Nombre: ${r.name}</div>
+                    </div>
+                    <button type="button" class="btn-remove" onclick="removeRecipient(${i})">
+                        Eliminar
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('bulkEmailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (recipients.length === 0) {
+                alert('Por favor agrega al menos un destinatario');
+                return;
+            }
+
+            const subject = document.getElementById('subject').value;
+            const body_html = document.getElementById('body_html').value;
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Enviando...';
+
+            document.getElementById('progressSection').style.display = 'block';
+
+            try {
+                const response = await fetch('/mailer/send-bulk/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        recipients: recipients,
+                        subject: subject,
+                        body_html: body_html,
+                    })
+                });
+
+                const result = await response.json();
+
+                const total = result.sent + result.failed;
+                const percentage = total > 0 ? (result.sent / total) * 100 : 0;
+                
+                document.getElementById('progressFill').style.width = percentage + '%';
+                document.getElementById('progressText').textContent = 
+                    `${result.sent}/${total} enviados (${Math.round(percentage)}%)`;
+
+                const resultDiv = document.getElementById('resultMessage');
+                if (result.error) {
+                    resultDiv.className = 'result-message error';
+                    resultDiv.innerHTML = `<strong>❌ Error:</strong> ${result.error}`;
+                } else {
+                    resultDiv.className = 'result-message success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Operación completada</strong><br>
+                        ✅ Enviados: <strong>${result.sent}</strong><br>
+                        ❌ Fallidos: <strong>${result.failed}</strong>
+                    `;
+                    setTimeout(() => location.reload(), 2000);
+                }
+
+            } catch (error) {
+                document.getElementById('resultMessage').className = 'result-message error';
+                document.getElementById('resultMessage').innerHTML = 
+                    `<strong>❌ Error:</strong> ${error.message}`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✅ Enviar Correos Masivos';
+            }
+        });
+
+        document.getElementById('recipientEmail').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addRecipient();
+            }
+        });
+    </script>
+</body>
+</html>

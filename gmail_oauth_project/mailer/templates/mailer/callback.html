@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Autorización OAuth2</title></head>
+<body style="font-family:Arial;max-width:600px;margin:60px auto;text-align:center">
+    {% if success %}
+        <h2 style="color:green">✅ Autorización exitosa</h2>
+        <p>La cuenta <strong>{{ email }}</strong> fue autorizada correctamente.</p>
+        <p>Los tokens han sido almacenados de forma segura.</p>
+    {% else %}
+        <h2 style="color:red">❌ Error en la autorización</h2>
+        <p>{{ error }}</p>
+    {% endif %}
+    <br>
+    <a href="/mailer/" style="padding:10px 20px;background:#4285f4;color:white;
+       text-decoration:none;border-radius:5px">← Volver al inicio</a>
+</body>
+</html>
