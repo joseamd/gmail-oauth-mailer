@@ -277,11 +277,30 @@
         <h2>Estado de Autorización</h2>
         {% if tokens %}
             <p class="success">✅ Cuenta(s) autorizada(s):</p>
-            <ul>
+            <table>
+                <tr>
+                    <th>Correo</th>
+                    <th>Última actualización</th>
+                    <th>Acciones</th>
+                </tr>
                 {% for token in tokens %}
-                    <li><strong>{{ token.email }}</strong> — Actualizado: {{ token.updated_at }}</li>
+                    <tr>
+                        <td><strong>{{ token.email }}</strong></td>
+                        <td>{{ token.updated_at|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <form method="post" action="{% url 'mailer:revoke_account' token.id %}" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas desautorizar esta cuenta?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn" style="background: #ff4757; padding: 6px 12px; font-size: 12px;">
+                                    🔒 Desautorizar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
                 {% endfor %}
-            </ul>
+            </table>
+            <div style="margin-top: 15px;">
+                <a href="{% url 'mailer:authorize' %}" class="btn">➕ Autorizar otra cuenta Gmail</a>
+            </div>
         {% else %}
             <p class="error">⚠️ No hay cuentas autorizadas aún.</p>
             <a href="{% url 'mailer:authorize' %}" class="btn">🔑 Autorizar cuenta Gmail</a>

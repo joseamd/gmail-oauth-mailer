@@ -13,6 +13,22 @@ from .gmail_service import (
 from .models import OAuthToken, EmailLog
 
 
+def revoke_account(request, token_id):
+    """Elimina una cuenta autorizada."""
+    if request.method == 'POST':
+        try:
+            token = OAuthToken.objects.get(id=token_id)
+            email = token.email
+            token.delete()
+            messages.success(request, f"Cuenta {email} desautorizada correctamente.")
+        except OAuthToken.DoesNotExist:
+            messages.error(request, "Cuenta no encontrada.")
+        except Exception as e:
+            messages.error(request, f"Error al desautorizar: {str(e)}")
+    
+    return redirect('mailer:index')
+
+
 def index(request):
     """Página principal: muestra si hay una cuenta autorizada."""
     tokens    = OAuthToken.objects.all()

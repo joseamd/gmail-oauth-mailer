@@ -9,4 +9,5 @@ urlpatterns = [
     path('oauth2/callback/',    views.oauth2_callback, name='oauth2_callback'),
     path('send/',               views.send_email_view, name='send_email'),
     path('send-bulk/',          views.send_bulk_view,  name='send_bulk'),
+    path('revoke/<int:token_id>/', views.revoke_account, name='revoke_account'),
 ]
