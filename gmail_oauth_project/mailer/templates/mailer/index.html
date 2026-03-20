@@ -298,9 +298,6 @@
                     </tr>
                 {% endfor %}
             </table>
-            <div style="margin-top: 15px;">
-                <a href="{% url 'mailer:authorize' %}" class="btn">➕ Autorizar otra cuenta Gmail</a>
-            </div>
         {% else %}
             <p class="error">⚠️ No hay cuentas autorizadas aún.</p>
             <a href="{% url 'mailer:authorize' %}" class="btn">🔑 Autorizar cuenta Gmail</a>
@@ -360,7 +357,7 @@
                 <div style="background: #f0f4ff; border: 1px solid #e0e8ff; border-radius: 5px; padding: 15px; margin: 15px 0;">
                     <h3 style="color: #667eea; margin-bottom: 10px;">➕ Agregar Destinatarios</h3>
                     <div class="form-row">
-                        <input type="email" id="recipientEmail" placeholder="correo@ejemplo.com" required>
+                        <input type="email" id="recipientEmail" placeholder="correo@ejemplo.com">
                         <input type="text" id="recipientName" placeholder="Nombre (opcional)">
                     </div>
                     <button type="button" class="btn btn-secondary" onclick="addRecipient()" style="width: 100%;">
